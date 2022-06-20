@@ -7,6 +7,7 @@ public class quickPow {
     public static void main(String[] args) {
         System.out.println(quickPow(3,2));
         System.out.println(Math.pow(3,-2));
+        System.out.println(Math.pow(1.00000,-2147483648));
     }
 
     public static double quickPow(double x,int n){

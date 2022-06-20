@@ -15,8 +15,12 @@ import java.util.List;
  * A、求数组内各个起点开始的递增子序列的长度
  * B、当一个问题为：变更数组的多少个数字，可以使得数据变成全递增时：那么就可以转换为求最长的递增子序列的长度，它与数组的长度的差，剩就是都需要变更的数字的数量
  * C、...
+ *
+ * 注意二分和常规dp里面的判断条件：
+ *  如果不要求严格递增，则用<=，因为把 2，2，3，这样子也算为递增
+ *  如果要求严格递增，则用<，因为 2，2，3，只有2，3可以算为严格递增
  */
-public class lis {
+public class Lis {
 
     /**
      * 一些自测案例:
@@ -50,6 +54,8 @@ public class lis {
         for(int i=0;i<len;i++){
             dp[i] = 1;
             for(int j=0;j<i;j++){
+                //如果不要求严格递增，则用<=，因为把 2，2，3，这样子也算为递增
+                //如果要求严格递增，则用<，因为 2，2，3，只有2，3可以算为严格递增
                 if(nums[j]<nums[i]) dp[i] = Math.max(dp[i] , dp[j]+1);
             }
             result = Math.max(result , dp[i]);
@@ -74,6 +80,8 @@ public class lis {
             int right = end;
             while(left<right){
                 int mid = (left + right)/2;
+                //如果不要求严格递增，则用<=，因为把 2，2，3，这样子也算为递增
+                //如果要求严格递增，则用<，因为 2，2，3，只有2，3可以算为严格递增
                 if(tail[mid]<=nums[i]){
                     left = mid + 1;
                 }else{
@@ -102,6 +110,8 @@ public class lis {
             int right = end;
             while(left<right){
                 int mid = (left + right)/2;
+                //如果不要求严格递增，则用<=，因为把 2，2，3，这样子也算为递增
+                //如果要求严格递增，则用<，因为 2，2，3，只有2，3可以算为严格递增
                 if(tail[mid]<=x){
                     left = mid + 1;
                 }else{
