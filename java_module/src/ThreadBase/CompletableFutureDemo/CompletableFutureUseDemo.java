@@ -1,4 +1,4 @@
-package ThreadBase;
+package ThreadBase.CompletableFutureDemo;
 
 import java.util.concurrent.*;
 import java.util.function.Consumer;

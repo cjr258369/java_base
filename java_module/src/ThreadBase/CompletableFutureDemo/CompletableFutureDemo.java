@@ -1,8 +1,6 @@
-package ThreadBase;
+package ThreadBase.CompletableFutureDemo;
 
-import javax.lang.model.element.VariableElement;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
