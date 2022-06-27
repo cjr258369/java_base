@@ -3,6 +3,7 @@ package ThreadBase.Locks;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * 公平锁 与 非公平锁
  * @author chenjunran
  * @date 2022/6/24
  */
