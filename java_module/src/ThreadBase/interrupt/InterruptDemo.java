@@ -12,25 +12,6 @@ public class InterruptDemo {
     static AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 
     public static void main(String[] args) {
-        Thread t1 = new Thread(() -> {
-            while(true){
-                if(Thread.currentThread().isInterrupted()){
-                    System.out.println(Thread.currentThread().getName() + "\t 中断标识："
-                            +Thread.currentThread().isInterrupted() + " ， 线程停止");
-                    break;
-                }
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                System.out.println("------hello InterruptDemo3");
-            }
-        }, "t1");
-        t1.start();
-
-        try {TimeUnit.SECONDS.sleep(1);} catch (InterruptedException e) {e.printStackTrace();}
-        new Thread(() -> t1.interrupt(), "t2").start();
     }
 
     private static void interruptDemo2() {
