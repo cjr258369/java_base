@@ -10,9 +10,33 @@ import java.util.concurrent.TimeUnit;
  */
 public class ThreadLocalDemo1 {
     public static void main(String[] args) {
-        xuqiu2();
+        xuqiu3();
     }
 
+    //改进 xuqiu2 方法，切记无论是线程池还是 每次 new 线程，都要 remove
+    private static void xuqiu3() {
+        House house = new House();
+        for(int i = 1; i <= 5; i++){
+            new Thread(() -> {
+                try {
+                    //造个随机数，意思是当前销售（线程），卖出的房子数量
+                    int count = new Random().nextInt(5) + 1;
+                    for (int j = 1; j <= count; j++) {
+                        house.saleValueByThreadLocal();
+                    }
+                    System.out.println(Thread.currentThread().getName() + " 号销售，卖出了：" + house.saleValue.get() +" 套");
+                } finally {
+                    house.saleValue.remove();
+                }
+            }, String.valueOf(i)).start();
+        }
+
+        //暂停几秒钟线程
+        try {TimeUnit.SECONDS.sleep(1);} catch (InterruptedException e) {e.printStackTrace();}
+        //System.out.println(Thread.currentThread().getName() + "\t 共计卖出多少套：" + house.saleCount);
+    }
+
+    //需求2 代码 demo
     private static void xuqiu2() {
         House house = new House();
         for(int i = 1; i <= 5; i++){
