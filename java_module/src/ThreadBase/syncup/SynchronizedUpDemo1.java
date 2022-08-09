@@ -2,6 +2,8 @@ package ThreadBase.syncup;
 
 import org.openjdk.jol.info.ClassLayout;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 锁升级过程 源码标志位证明 demo：
  * MarkWord 信息查看技巧
@@ -11,6 +13,48 @@ import org.openjdk.jol.info.ClassLayout;
  */
 public class SynchronizedUpDemo1 {
     public static void main(String[] args) {
+
+        biasedDemo2();
+    }
+
+    private static void biasedDemo2() {
+        try {TimeUnit.SECONDS.sleep(5);} catch (InterruptedException e) {e.printStackTrace();}
+
+        //情况一：没有 synchronized，也会默认升级为偏向锁，但因为没有线程持有，所以线程指针处显示0
+        Object o = new Object();
+        System.out.println(ClassLayout.parseInstance(o).toPrintable());
+
+        System.out.println("=================");
+
+        //情况二：加了 synchronized 之后，就会记录线程ID
+        new Thread(() -> {
+            synchronized (o){
+                System.out.println(ClassLayout.parseInstance(o).toPrintable());
+            }
+        }, "t1").start();
+    }
+
+    //biased 偏向锁的标志位查看，以及开关
+    private static void biasedLockOpenOff() {
+        //偏向锁演示方案二： 不修改偏向锁的启动延时，等待默认的 4000 毫秒后，再执行下方代码
+        //暂停几秒钟线程
+        try {TimeUnit.SECONDS.sleep(5);} catch (InterruptedException e) {e.printStackTrace();}
+
+        //biased 偏向锁
+        Object o = new Object();
+        //直接按照默认的话，锁标志位是：000 = 轻量级锁，并不是 偏向锁，因为偏向锁的启动有延时
+        //添加参数：-XX:BiasedLockingStartupDelay=0 ， 设置启动延时为 0 毫秒后，再执行就能看到锁标志位为：101 = 偏向锁了
+        synchronized (o){
+            System.out.println(ClassLayout.parseInstance(o).toPrintable());
+        }
+    }
+
+    /**
+     *  锁升级过程 源码标志位证明 demo：
+     *  MarkWord 信息查看技巧
+     *  无锁状态：001
+     */
+    private static void noLock() {
         Object o = new Object();
         //      0     4        (object header)                           01 00 00 00 (00000001 00000000 00000000 00000000) (1)
         //      4     4        (object header)                           00 00 00 00 (00000000 00000000 00000000 00000000) (0)
