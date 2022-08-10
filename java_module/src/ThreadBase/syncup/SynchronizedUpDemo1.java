@@ -13,8 +13,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class SynchronizedUpDemo1 {
     public static void main(String[] args) {
-
-        biasedDemo2();
+        //关闭偏向锁，关闭偏向锁后，程序默认会进入轻量级锁状态
+        //-XX:-UseBiasedLocking
+        Object o = new Object();
+        new Thread(() -> {
+            synchronized (o){
+                System.out.println(ClassLayout.parseInstance(o).toPrintable());
+            }
+        }, "t1").start();
     }
 
     private static void biasedDemo2() {
