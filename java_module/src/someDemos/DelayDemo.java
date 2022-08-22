@@ -2,9 +2,7 @@ package someDemos;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 // 延迟队列 Demo
 public class DelayDemo {
@@ -222,3 +220,225 @@ public class DelayDemo {
     }
 
 }
+
+//package com.avivacofco.dms.bpmInvocation;
+//
+//        import com.avivacofco.dms.bpmInvocation.service.BpmInvocationManager;
+//        import com.avivacofco.dms.bpmInvocation.service.BpmWebserviceInvoker;
+//        import com.avivacofco.policy.util.WebSaleSendEmail;
+//        import com.avivacofco.quartz.IJob;
+//        import com.siebre.bmf.BmfContext;
+//        import com.siebre.mapping.CodeMapping;
+//        import com.siebre.party.service.PartyManager;
+//        import com.siebre.policy.SimpleInsurancePolicy;
+//        import com.siebre.policy.service.InsurancePolicyManager;
+//        import com.siebre.policy.util.CodeMappingCacheUtils;
+//        import com.siebre.util.IPUtil;
+//        import org.apache.commons.lang.StringUtils;
+//        import org.apache.log4j.Logger;
+//        import org.springframework.beans.factory.annotation.Autowired;
+//        import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+//        import org.springframework.util.StopWatch;
+//
+//        import java.net.UnknownHostException;
+//        import java.text.SimpleDateFormat;
+//        import java.util.*;
+//        import java.util.concurrent.*;
+//        import java.util.concurrent.locks.LockSupport;
+//
+//public class StartUpBpmByMultipleSpecOrderJob implements IJob {
+//    public static final Logger log = Logger.getLogger(StartUpBpmByMultipleSpecOrderJob.class);
+//
+//    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//
+//    @Autowired
+//    private BpmInvocationManager bpmInvocationManager;
+//
+//    @Autowired
+//    private InsurancePolicyManager insurancePolicyManager;
+//
+//    private static String HOST_IP = "";
+//    private static StopWatch sw;
+//
+//    private static final int CORE_POOL_SIZE = 20; // 核心线程数量
+//    private static final int MAX_POOL_SIZE = 30; // 最大线程数量
+//    private static final long KEEP_ALIVE_TIME = 2L; // 非核心线程保留时长
+//    ConcurrentHashMap<String, Boolean> mapState;
+//
+//
+//    public void doJob() {
+//        try {
+//            log.error("--- start ----");
+//            sw = new StopWatch(UUID.randomUUID().toString());
+//
+//            //if(checkExecuteIp()){
+//            //	callBpm(getData());
+//            //}
+//            checkExecuteIp();
+//            //调用BPM
+//            callBpm(getData());
+//
+//            //记录任务耗时耗时
+//            log.error(sw.prettyPrint());
+//            log.error("所有方法总耗时：" + (sw.getTotalTimeMillis() > 10000 ? sw.getTotalTimeSeconds() + " s" : sw.getTotalTimeMillis() + " ms") + " , 调用方法数量：" + sw.getTaskCount());
+//        }catch (Exception e) {
+//            e.printStackTrace();
+//            log.error(HOST_IP + "StartUpBpmByMultipleSpecOrderJob 的 doJob 执行异常：", e);
+//            //sendEMailOnFailure(e.getMessage());
+//        }
+//    }
+//
+//    protected static void sendEMailOnFailure(String exception){
+//        //设置邮件发送内容
+//        try{
+//            Map<String,Object> params = new HashMap<String,Object>();
+//            StringBuffer content = new StringBuffer();
+//            content.append("调用BPM时出错，类StartUpBpmByMultipleSpecOrderJob的doJobSingle/doJob，具体错误信息：").append(exception);
+//            params.put("mailTo", BpmReadProperties.read("email"));
+//            params.put("content", content.toString());
+//            params.put("subject", "调用BPM出错");
+//            //WebSaleSendEmail.sendEmail(params);
+//        }
+//        catch(Exception e){
+//            log.error("调用bpm的实时邮件发送失败："+e.getMessage());
+//        }
+//    }
+//
+//    //检查本机IP 是否 是执行机器的 IP
+//    private boolean checkExecuteIp() throws Exception {
+//        sw.start("checkExecuteIp");
+//        HOST_IP = IPUtil.getLocalIP();
+//        String serverIp ="";
+//        List<CodeMapping> codes = CodeMappingCacheUtils.getCodeMappingList("startUpBpmInstanceIP");
+//        if(codes != null && codes.size() > 0) {
+//            serverIp = codes.get(0).getTargetValue();
+//        }
+//        sw.stop();
+//        return HOST_IP.equals(serverIp);
+//    }
+//
+//    /**
+//     * 封装从数据库获取到的数据到 map
+//     * @return map = { 5F5FCC37-6D03-29F9-B2D4-7E19FFAD6D94 = {21000991655, 11001785380} , ...}
+//     */
+//    private ConcurrentHashMap<String, Deque<String>> getData(){
+//        sw.start("getData");
+//        List<BpmInvocation> bpmInvocationList = bpmInvocationManager.findInvocationByMultipleSpecOrder(BpmInvocationStatus.FAILED);
+//        ConcurrentHashMap<String, Deque<String>> map = new ConcurrentHashMap<>();
+//
+//        //循环按照 MultipleSpecOrderNumber 字段分组
+//        //测试取第 100 - 200 条
+//        for(int i = 100; i < 150; i++){
+//            BpmInvocation bpmInvocation = bpmInvocationList.get(i);
+//            String key = bpmInvocation.getMultipleSpecOrderNumber();
+//            if(StringUtils.isNotEmpty(bpmInvocation.getPolicyNumber())){
+//                if(!map.containsKey(key)){
+//                    map.put(key, new LinkedList<String>());
+//                }
+//                map.get(key).offer(bpmInvocation.getPolicyNumber());
+//            }
+//        }
+//        //for (BpmInvocation bpmInvocation : bpmInvocationList) {
+//        //	String key = bpmInvocation.getMultipleSpecOrderNumber();
+//        //	if(StringUtils.isNotEmpty(bpmInvocation.getPolicyNumber())){
+//        //		if(!map.containsKey(key)){
+//        //			map.put(key, new LinkedList<String>());
+//        //		}
+//        //		map.get(key).offer(bpmInvocation.getPolicyNumber());
+//        //	}
+//        //}
+//        //log.error("本次执行任务的数据：" + map);
+//        log.error("map 的大小 = " + map.size());
+//        sw.stop();
+//        return map;
+//    }
+//
+//    /**
+//     * 并发处理起BPM
+//     * @param mapPolicy = { 5F5FCC37-6D03-29F9-B2D4-7E19FFAD6D94 = {21000991655, 11001785380} , ...}，调用 getData() 获得的map
+//     */
+//    private void callBpm(final ConcurrentHashMap<String, Deque<String>> mapPolicy){
+//        if(mapPolicy == null || mapPolicy.isEmpty()) return;
+//
+//        // 取出当前到期任务，执行起 BPM 调用
+//        final BpmWebserviceInvoker bpmWebserviceInvoker = (BpmWebserviceInvoker) BmfContext.getBean("bpmWebserviceInvoker");
+//
+//        //mapState 存 每个主单号当前的状态
+//        final ConcurrentHashMap<String, Boolean> mapState = new ConcurrentHashMap<>();
+//        for (String s : mapPolicy.keySet()) {
+//            mapState.put(s, true);
+//        }
+//        //延时队列
+//        final DelayQueue<SimpleInsurancePolicy> delayQueue = new DelayQueue<>();
+//        //生产线程池
+//        ThreadPoolExecutor producerThreadPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.MINUTES,
+//                new ArrayBlockingQueue<Runnable>(200), new CustomizableThreadFactory("producer-Thread-Pool"));
+//        //消费线程池
+//        ThreadPoolExecutor consumerThreadPool = new ThreadPoolExecutor(MAX_POOL_SIZE, CORE_POOL_SIZE + MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.MINUTES,
+//                new ArrayBlockingQueue<Runnable>(200), new CustomizableThreadFactory("consumer-Thread-Pool"));
+//
+//        try {
+//            //生产没结束 或 消费没结束
+//            while(!mapPolicy.isEmpty() || !delayQueue.isEmpty()){
+//                //生成 BPM 任务
+//                for(Map.Entry<String, Boolean> entry : mapState.entrySet()) {
+//                    final String multipleSpecOrderNumber = entry.getKey();
+//                    if(entry.getValue() && mapPolicy.containsKey(multipleSpecOrderNumber)){
+//                        producerThreadPool.execute(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                SimpleInsurancePolicy policy = insurancePolicyManager.findInsurancePolicyByPolicyNo(mapPolicy.get(multipleSpecOrderNumber).poll());
+//                                if(policy != null){
+//                                    //当前 multipleSpecOrderNumber 上锁
+//                                    mapState.put(multipleSpecOrderNumber, false);
+//                                    policy.setMultipleSpecOrderNumber(multipleSpecOrderNumber);
+//                                    //该保单的预期执行时间：当前时间 + 10 秒
+//                                    policy.setDelayEndTime(System.currentTimeMillis() + 10000);
+//                                    delayQueue.put(policy);
+//                                    System.out.println(" -------- delayQueue.size = " + delayQueue.size());
+//                                    log.error("生成了，单号：" + multipleSpecOrderNumber + " , 保单号：" + policy.getPolicyNumber());
+//                                }
+//                            }
+//                        });
+//                    }
+//                    if(mapPolicy.containsKey(multipleSpecOrderNumber) && mapPolicy.get(multipleSpecOrderNumber).isEmpty()){
+//                        mapPolicy.remove(multipleSpecOrderNumber);
+//                    }
+//                }
+//
+//                System.out.println("delayQueue.size = " + delayQueue.size());
+//
+//                while(!delayQueue.isEmpty()){
+//                    final SimpleInsurancePolicy[] policy = {null};
+//                    consumerThreadPool.execute(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                policy[0] = delayQueue.take();
+//                                log.error("开始执行 BPM 调用，单号：" + policy[0].getMultipleSpecOrderNumber() + " , 保单号：" + policy[0].getPolicyNumber());
+//                                //调用处理逻辑
+//                                //bpmWebserviceInvoker.invoke(policy);
+//                            } catch (Exception e) {
+//                                String msg = policy[0] == null ? "BPM 调用异常，异常信息" : "BPM 调用异常，单号：" + policy[0].getMultipleSpecOrderNumber() + " , 保单号："+ policy[0].getPolicyNumber()+" ， 异常信息：";
+//                                log.error(msg, e);
+//                            }finally {
+//                                if(policy[0] != null){
+//                                    // 当前 multipleSpecOrderNumber 的 PolicyNumber 起BPM 结束后， 设置 multipleSpecOrderNumber 的状态为 true，
+//                                    // multipleSpecOrderNumber 的 下一个保单任务可以继续生成
+//                                    mapState.put(policy[0].getMultipleSpecOrderNumber(), true);
+//                                }
+//                            }
+//                        }
+//                    });
+//                }
+//            }
+//        } finally {
+//            producerThreadPool.shutdown();
+//            consumerThreadPool.shutdown();
+//            System.out.println("结束");
+//        }
+//
+//
+//    }
+//}
+
