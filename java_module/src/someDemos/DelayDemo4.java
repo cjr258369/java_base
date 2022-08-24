@@ -3,18 +3,16 @@ package someDemos;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
 
 // 延迟队列 Demo
-public class DelayDemo3 {
+public class DelayDemo4 {
     SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final int CORE_POOL_SIZE = 5; // 最大核心线程
-    private static final int MAX_POOL_SIZE = 10; // 最大线程
-    private static final long KEEP_ALIVE_TIME = 2L; // 非核心线程保留时长
 
     public static void main(String[] args) {
         //参考：https://blog.csdn.net/piaoranyuji/article/details/124453884
         //多线程情况下，使用 ConcurrentHashMap，JDK1.7使用分段锁
-        DelayDemo3 t = new DelayDemo3();
+        DelayDemo4 t = new DelayDemo4();
         t.tes();
     }
     public void tes(){
@@ -58,72 +56,32 @@ public class DelayDemo3 {
 
         System.out.println("所有数据：" + map);
 
-        ConcurrentHashMap<String, Boolean> mapFinish = new ConcurrentHashMap<>();
-        for (String key : map.keySet()) {
-            mapFinish.put(key, true);
-        }
         //任务队列
-        DelayQueue<OrderQueue> delayQueue = new DelayQueue<>();
+        DelayOrderResource resource = new DelayOrderResource(map);
         //生产者线程池
         ExecutorService threadPool1 = Executors.newFixedThreadPool(3);
         //消费者线程池
         ExecutorService threadPool2 = Executors.newFixedThreadPool(3);
 
-
         long start = System.currentTimeMillis();
-        try {
-            //所有任务未生成完毕，或者存在未消费的任务，则继续执行
-            int turn = 1;
-            while(!map.isEmpty() || !delayQueue.isEmpty()){
-                //遍历所有能生产任务的单号，生成执行任务
-                for(Map.Entry<String, Boolean> entry : mapFinish.entrySet()){
-                    String key = entry.getKey();
-                    if(entry.getValue() && map.containsKey(key)){
-                        mapFinish.put(key, false);
-                        int finalTurn = turn > 1 ? 10000 : 2000;
-                        threadPool1.execute(() -> {
-                            OrderQueue a = map.get(key).poll();
-                            //该订单执行时间：当前时间 + 10 秒
-                            a.setEndTime(System.currentTimeMillis() + finalTurn);
-                            if (delayQueue.offer(a)) {
-                                System.out.println((sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis())))))
-                                        + "\t" + Thread.currentThread().getName()
-                                        + " 生产了：" + a.toString());
-                            }
-                        });
-                    }
-                    if(map.containsKey(key) && map.get(key).isEmpty()){
-                        map.remove(key);
-                        mapFinish.put(key, false);
-                    }
-                }
-                turn++;
-                System.out.println("before mapFinish = " + mapFinish + " , delayQueue.size() = " + delayQueue.size() + " ， map = " + map);
 
-                //消费所有到期的任务
-                while(!delayQueue.isEmpty()){
-                    threadPool2.execute(() -> {
-                        String key = "";
-                        try {
-                            OrderQueue queueOrder = delayQueue.poll();
-                            if(queueOrder != null){
-                                key = queueOrder.getBigOrderId();
-                                System.out.println((sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis()))))) +"\t" +Thread.currentThread().getName() + " 执行了BPM：" + queueOrder.toString());
-                                //调用处理逻辑
-                            }
-                        } catch (Exception e) {
-                            System.out.println("订单处理异常：" + e.getMessage());
-                        }finally{
-                            //释放锁
-                            if(key != null && map.containsKey(key) && !map.get(key).isEmpty()){
-                                mapFinish.put(key, true);
-                            }
-                        }
+        try {
+            int round = 1;
+            while(resource.canStop()){
+                for(String s : resource.mapFinish.keySet()){
+                    long delayTime = round > 1 ? 10000L : 2000L;
+                    threadPool1.execute(() -> {
+                        resource.produce(s, delayTime);
                     });
                 }
-                System.out.println("after mapFinish = " + mapFinish + " , delayQueue.size() = " + delayQueue.size() + " ， map = " + map);
+                round++;
+                while(!resource.delayQueue.isEmpty()){
+                    threadPool2.execute(resource::consume);
+                }
+                //System.out.println("delay size = " + resource.delayQueue.size() + " , state = " + resource.mapFinish + " , map = " + resource.mapOrder);
             }
         } finally {
+            System.out.println(map);
             System.out.println("关闭线程池");
             threadPool1.shutdown();
             threadPool2.shutdown();
@@ -196,6 +154,82 @@ public class DelayDemo3 {
                     ", 预计执行时间=" + (sdf.format(new Date(Long.parseLong(String.valueOf(endTime))))) +
                     '}';
         }
+    }
+
+    public class DelayOrderResource{
+        private ReadWriteLock lock = new ReentrantReadWriteLock();
+
+        private DelayQueue<OrderQueue> delayQueue = new DelayQueue<>();
+        private ConcurrentHashMap<String, ArrayDeque<OrderQueue>> mapOrder;
+        volatile ConcurrentHashMap<String, Boolean> mapFinish = new ConcurrentHashMap<>();
+
+        public DelayOrderResource(ConcurrentHashMap<String, ArrayDeque<OrderQueue>> mapOrder){
+            this.mapOrder = mapOrder;
+            for (String s : mapOrder.keySet()) {
+                mapFinish.put(s, true);
+            }
+        }
+
+
+        /**
+         * 生产者向延迟队列中添加资源
+         */
+        public void produce(String bigOrderNum, Long delayTime) {
+            lock.writeLock().lock();
+            try {
+                while(mapFinish.get(bigOrderNum)){
+                    mapFinish.put(bigOrderNum, false);
+                    OrderQueue a = mapOrder.get(bigOrderNum).poll();
+                    //该订单执行时间：当前时间 + 10 秒
+                    a.setEndTime(System.currentTimeMillis() + delayTime);
+                    if(delayQueue.offer(a)){
+                        System.out.println((sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis()))))) + " 生产了：" + a.toString());
+                    }
+                    if(mapOrder.containsKey(bigOrderNum) && mapOrder.get(bigOrderNum).isEmpty()){
+                        mapOrder.remove(bigOrderNum);
+                        mapFinish.put(bigOrderNum, false);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("订单生产出现异常" + e.getMessage());
+                e.printStackTrace();
+            }finally {
+                lock.writeLock().unlock();
+            }
+        }
+
+        /**
+         * 将延迟队列中的订单移除并处理
+         */
+        public void consume() {
+            lock.writeLock().lock();
+            OrderQueue queueOrder = null;
+            try {
+                queueOrder = delayQueue.poll();
+                if(queueOrder != null){
+                    //调用处理逻辑
+                    System.out.println((sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis()))))) + " 执行了BPM：" + queueOrder.toString());
+                }
+            } catch (Exception e) {
+                System.out.println("订单处理异常：" + e.getMessage());
+                e.printStackTrace();
+            }finally {
+                if(queueOrder != null && mapOrder.containsKey(queueOrder.getBigOrderId()) && !mapOrder.get(queueOrder.getBigOrderId()).isEmpty()){
+                    mapFinish.put(queueOrder.getBigOrderId(), true);
+                }
+                lock.writeLock().unlock();
+            }
+        }
+
+        public boolean canStop(){
+            lock.readLock().lock();
+            try{
+                return !mapOrder.isEmpty() || !delayQueue.isEmpty();
+            }finally {
+                lock.readLock().unlock();
+            }
+        }
+
     }
 
 }
