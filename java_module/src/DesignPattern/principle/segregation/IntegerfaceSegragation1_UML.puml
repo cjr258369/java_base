@@ -1,0 +1,12 @@
+@startuml
+interface interface1
+interface1 : operation1():void
+interface1 : operation2():void
+interface1 : operation3():void
+interface1 : operation4():void
+interface1 : operation5():void
+interface1 <|-- ClassA
+interface1 <|-- ClassB
+interface1 <|-- ClassC
+interface1 <|-- ClassD
+@enduml
