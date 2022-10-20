@@ -3,7 +3,7 @@ package DesignPattern.patterns.singletonPattern;
 /**
  * @date 2022/10/19
  * 
- * 23中设计模式之单例模式：饿汉式（静态常量）
+ * 23种设计模式之单例模式：饿汉式（静态常量）
  */
 public class SingletonTest01 {
     public static void main(String[] args) {
