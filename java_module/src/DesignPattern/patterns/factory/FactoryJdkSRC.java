@@ -1,4 +1,4 @@
-package DesignPattern.patterns.factory.jdkSRC;
+package DesignPattern.patterns.factory;
 
 import java.util.Calendar;
 
@@ -7,7 +7,7 @@ import java.util.Calendar;
  * 
  * 在 JDK 的 Calendar 中，就是使用了简单工厂模式。
  */
-public class jdkSourceCode {
+public class FactoryJdkSRC {
     public static void main(String[] args) {
         // getInstance 是 Calendar 的静态方法，里面调用了 createCalendar()，依据时区，和地区来进行返回。
         // createCalendar() 方法的 1672 行开始，创建 cal 里用了switch case，就是简单工厂模式，根据不同地区的类型，创建不同的 cal 返回。

@@ -5,7 +5,7 @@ package DesignPattern.patterns.singletonPattern;
  * 
  * 在 JDK 中，java.lang.Runtime 就是经典的单例模式
  */
-public class TestRumtime {
+public class SingletonJdkSRC {
     public static void main(String[] args) {
         //Runtime
         
