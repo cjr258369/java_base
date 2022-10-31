@@ -3,7 +3,7 @@ package DesignPattern.patterns.factory.simplefactory.pizzaStore.pizza;
 /**
  * @date 2022/10/21
  * 
- * 23种设计模式之单例模式：简单工厂模式【传统写法】
+ * 23种设计模式之单例模式：简单工厂模式【传统思路】
  * 
  * 将 Pizza 类做成抽象
  */

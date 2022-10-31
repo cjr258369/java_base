@@ -2,6 +2,7 @@ package DesignPattern.patterns.prototype;
 
 /**
  * @date 2022/10/27
+ * 在 Spring 中，生成 bean 使用的就是原型模式
  */
 public class PrototypeSpringSRC {
     private Integer id = 10;

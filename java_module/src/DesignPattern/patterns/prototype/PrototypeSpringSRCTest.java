@@ -5,6 +5,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @date 2022/10/27
+ * 
+ * 在 Spring 中，生成 bean 使用的就是原型模式
  */
 public class PrototypeSpringSRCTest {
     public static void main(String[] args) {
