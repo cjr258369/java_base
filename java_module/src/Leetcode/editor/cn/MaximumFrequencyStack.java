@@ -46,8 +46,7 @@ public class MaximumFrequencyStack{
         
         public void push(int val) {
             freq.put(val, freq.getOrDefault(val, 0) + 1);
-            group.putIfAbsent(freq.get(val), new ArrayDeque<Integer>());
-            group.get(freq.get(val)).push(val);
+            group.computeIfAbsent(freq.get(val), k -> new ArrayDeque<>()).push(val);
             maxFreq = Math.max(maxFreq, freq.get(val));
         }
         
