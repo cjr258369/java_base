@@ -3,7 +3,7 @@ package DesignPattern.patterns.prototype.usePrototype;
 /**
  * @date 2022/10/27
  * 
- * 23种设计模式之单例模式：原型模式【使用原型模式完成对象克隆】
+ * 23种设计模式之原型模式：使用原型模式完成对象克隆
  * 
  * 这种方式的克隆，以后 sheep 内部如果新增了属性，或者内容，都会同步的进行克隆，而不像前一种传统的 new 方法那样，
  * 需要改动多处的 Client 端代码，把新的属性给 get 出来，再 set 进去。

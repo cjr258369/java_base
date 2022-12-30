@@ -3,7 +3,7 @@ package DesignPattern.patterns.builder.improve;
 /**
  * @date 2022/10/31
  * 
- * 23种设计模式之单例模式：建造者模式【使用建造者模式，解耦产品与制作产品的流程，方便日后扩展产品，或者扩展和变更制作产品的流程】
+ * 23种设计模式之建造者模式：使用建造者模式，解耦产品与制作产品的流程，方便日后扩展产品，或者扩展和变更制作产品的流程
  */
 public class Client {
     public static void main(String[] args) {

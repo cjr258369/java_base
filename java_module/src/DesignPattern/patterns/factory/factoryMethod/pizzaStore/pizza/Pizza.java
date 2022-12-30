@@ -3,7 +3,7 @@ package DesignPattern.patterns.factory.factoryMethod.pizzaStore.pizza;
 /**
  * @date 2022/10/21
  * 
- * 23种设计模式之单例模式：工厂方法模式
+ * 23种设计模式之工厂方法模式
  * 
  * 将 Pizza 类做成抽象
  */

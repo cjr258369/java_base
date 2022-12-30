@@ -3,7 +3,7 @@ package DesignPattern.patterns.prototype.tradition;
 /**
  * @date 2022/10/27
  * 
- * 23种设计模式之单例模式：原型模式【传统思路】
+ * 23种设计模式之原型模式：传统思路
  */
 public class Client {
     public static void main(String[] args) {

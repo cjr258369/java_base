@@ -3,7 +3,7 @@ package DesignPattern.patterns.factory.absFactory.pizzaStore.pizza;
 /**
  * @date 2022/10/21
  * 
- * 23种设计模式之单例模式：抽象工厂模式
+ * 23种设计模式之抽象工厂模式
  * 
  * 将 Pizza 类做成抽象
  */

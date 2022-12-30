@@ -7,7 +7,7 @@ import DesignPattern.patterns.factory.simplefactory.pizzaStore.pizza.Pizza;
 
 /**
  * @date 2022/10/21
- * 23种设计模式之单例模式：简单工厂模式
+ * 23种设计模式之简单工厂模式
  * 简单工厂类
  */
 public class SimpleFactory {

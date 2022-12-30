@@ -3,7 +3,7 @@ package DesignPattern.patterns.adapter.interfaceAdapter;
 /**
  * @date 2022/11/2
  * 
- * 23种设计模式之单例模式：适配器模式【接口适配器】
+ * 23种设计模式之适配器模式：接口适配器
  * 
  * 在 AbsAdapter 中默认空实现 interface4 的所有方法
  * 使用时，可以使用匿名内部类，作为 它的子类，实现具体需要实现的方法即可。
