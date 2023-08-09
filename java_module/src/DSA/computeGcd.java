@@ -12,7 +12,7 @@ public class computeGcd {
 
     public static void main(String[] args) {
         //求两个数的公因数
-        System.out.println(BigInteger.valueOf(6).gcd(BigInteger.valueOf(9)));
+        System.out.println(BigInteger.valueOf(2).gcd(BigInteger.valueOf(5)));
         System.out.println(gcd(6, 9));
 
         //求一个数组的公因数
