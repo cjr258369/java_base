@@ -65,8 +65,8 @@ public class TreeNode {
     }
     
     //根据层序遍历出来的字符串list，生成一颗二叉树
-    //用法：TreeNode.deserializeList(new LinkedList<>(Arrays.asList("1", "2", "Null", "Null", "3", "4", "Null", "Null", "5"));
-    //用法：TreeNode.deserializeList(new LinkedList<>(Arrays.asList("1","2","4","8","Null","Null","9","Null","Null","5","10","Null","Null","11","Null","Null","3","6","Null","Null","7","Null","Null")))
+    //用法：TreeNode.deserializeList2(new LinkedList<>(Arrays.asList("1", "2", "Null", "Null", "3", "4", "Null", "Null", "5"));
+    //用法：TreeNode.deserializeList2(new LinkedList<>(Arrays.asList("1","2","4","8","Null","Null","9","Null","Null","5","10","Null","Null","11","Null","Null","3","6","Null","Null","7","Null","Null")))
     public static TreeNode deserializeList2(List<String> list){
         if(list.isEmpty()){
             return null;
